@@ -22,6 +22,8 @@ int main(){
 	srand(time(NULL));
 	int n = 10, m = 20;
 	cin >> n >> m;
+	if (n % 2 == 1)n++;
+	if (m % 2 == 1)m++;
 	bool** maze = new bool* [n]; 
 	for (int i = 0; i < n; ++i)
 		maze[i] = new bool[m] {0};
@@ -82,4 +84,7 @@ int main(){
 		(i == n - 2) ? cout << "  " : cout << static_cast<char>(177) << static_cast<char>(177);
 		cout << endl;
 	}
+	for (int count = 0; count < n; ++count)
+		delete[] maze[count];
+	delete[] maze;
 }
