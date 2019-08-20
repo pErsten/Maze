@@ -1,11 +1,16 @@
 ﻿#include <iostream>
+#include <windows.h>
 #include <vector>
 #include <ctime>
+ 
+#define SCREEN_HEIGHT 50
+#define SCREEN_WIDTH  100
+
 class Way {
 public:
 	int m_a;
 	int m_b;
-	Way(const int& a, const int& b): m_a(a), m_b(b){}
+	Way(const int& a, const int& b) : m_a(a), m_b(b) {}
 	friend std::ostream& operator<<(std::ostream& out, const Way& sh) {
 		out << sh.m_a << " " << sh.m_b << std::endl;
 		return out;
@@ -17,41 +22,57 @@ struct Point {
 	int m_a;
 	int m_b;
 };
-int main(){
+int main() {
 	using namespace std;
+
+	int posy = 3, posx = 1;
+
+	HANDLE hOutput = (HANDLE)GetStdHandle(STD_OUTPUT_HANDLE);
+
+	COORD dwBufferSize = { SCREEN_WIDTH,SCREEN_HEIGHT };
+	COORD dwBufferCoord = { 0, 0 };
+	SMALL_RECT rcRegion = { 0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1 };
+
+	CHAR_INFO maze[SCREEN_HEIGHT][SCREEN_WIDTH];
+
+	ReadConsoleOutput(hOutput, (CHAR_INFO*)maze, dwBufferSize,
+		dwBufferCoord, &rcRegion);
+
 	srand(time(NULL));
-	int n = 10, m = 20;
-	cin >> n >> m;
-	if (n % 2 == 1)n++;
-	if (m % 2 == 1)m++;
-	bool** maze = new bool* [n]; 
-	for (int i = 0; i < n; ++i)
-		maze[i] = new bool[m] {0};
+
 	vector<Way> m_maze;
-	m_maze.emplace_back(0, 0);
-	maze[0][0] = 1;
+	m_maze.emplace_back(1, 1);
+	maze[1][1].Attributes = 255;
+	bool check = false;
 	int i = 0, count = 0;
-	int ax, bx;
+	int ax = 1, bx = 1;
 	Point point[4];
-	while (count < (n / 2) * (m / 2) - 1) {
+	while (1) {
 		ax = m_maze.back().A();
 		bx = m_maze.back().B();
-		if (ax - 2 >= 0 && maze[ax - 2][bx] == 0) {
+		if (ax == 1 && bx == 1) {
+			if (check) {
+				system("pause");
+				exit(0);
+			}
+			check = true;
+		}
+		if (ax - 2 >= 1 && maze[ax - 2][bx].Attributes < 16) {
 			point[i].m_a = ax - 2;
 			point[i].m_b = bx;
 			++i;
 		}
-		if (ax + 2 <= n - 1 && maze[ax + 2][bx] == 0) {
+		if (ax + 2 <= SCREEN_HEIGHT - 2 && maze[ax + 2][bx].Attributes < 16) {
 			point[i].m_a = ax + 2;
 			point[i].m_b = bx;
 			++i;
 		}
-		if (bx - 2 >= 0 && maze[ax][bx - 2] == 0) {
+		if (bx - 2 >= 1 && maze[ax][bx - 2].Attributes < 16) {
 			point[i].m_a = ax;
 			point[i].m_b = bx - 2;
 			++i;
 		}
-		if (bx + 2 <= m - 1 && maze[ax][bx + 2] == 0) {
+		if (bx + 2 <= SCREEN_WIDTH - 2 && maze[ax][bx + 2].Attributes < 16) {
 			point[i].m_a = ax;
 			point[i].m_b = bx + 2;
 			++i;
@@ -60,31 +81,14 @@ int main(){
 			m_maze.pop_back();
 		}
 		else {
+			Sleep(10);
 			int fuq = rand() % i;
 			m_maze.emplace_back(point[fuq].m_a, point[fuq].m_b);
-			maze[point[fuq].m_a][point[fuq].m_b] = true;
-			maze[ax + (point[fuq].m_a - ax) / 2][bx + (point[fuq].m_b - bx) / 2] = true;
+			maze[point[fuq].m_a][point[fuq].m_b].Attributes = 255;
+			maze[ax + (point[fuq].m_a - ax) / 2][bx + (point[fuq].m_b - bx) / 2].Attributes = 255;
 			count++; i = 0;
 		}
+		WriteConsoleOutput(hOutput, (CHAR_INFO*)maze, dwBufferSize,
+			dwBufferCoord, &rcRegion);
 	}
-	cout << static_cast<char>(177) << static_cast<char>(177) << "  ";
-	for (i = 0; i < m - 1; i++)
-		cout << static_cast<char>(177) << static_cast<char>(177);
-	cout << endl;
-	for (i = 0; i < n; i++) {
-		cout << static_cast<char>(177) << static_cast<char>(177);
-		for (int j = 0; j < m - 1; j++) {
-			if (!maze[i][j]) {
-				cout << static_cast<char>(177);
-				cout << static_cast<char>(177);
-			}
-			else
-				cout << "  ";
-		}
-		(i == n - 2) ? cout << "  " : cout << static_cast<char>(177) << static_cast<char>(177);
-		cout << endl;
-	}
-	for (int count = 0; count < n; ++count)
-		delete[] maze[count];
-	delete[] maze;
 }
