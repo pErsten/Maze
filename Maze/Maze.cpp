@@ -1,20 +1,22 @@
-﻿#include <iostream>
+﻿//#include <iostream>
 #include <windows.h>
 #include <vector>
 #include <ctime>
  
 #define SCREEN_HEIGHT 50
-#define SCREEN_WIDTH  100
+#define SCREEN_WIDTH  211
+#define START_POINT_X 1
+#define START_POINT_Y 1
 
 class Way {
 public:
 	int m_a;
 	int m_b;
 	Way(const int& a, const int& b) : m_a(a), m_b(b) {}
-	friend std::ostream& operator<<(std::ostream& out, const Way& sh) {
+	/*friend std::ostream& operator<<(std::ostream& out, const Way& sh) {
 		out << sh.m_a << " " << sh.m_b << std::endl;
 		return out;
-	}
+	}*/
 	const int& A() { return m_a; }
 	const int& B() { return m_b; }
 };
@@ -25,15 +27,13 @@ struct Point {
 int main() {
 	using namespace std;
 
-	int posy = 3, posx = 1;
-
 	HANDLE hOutput = (HANDLE)GetStdHandle(STD_OUTPUT_HANDLE);
 
 	COORD dwBufferSize = { SCREEN_WIDTH,SCREEN_HEIGHT };
 	COORD dwBufferCoord = { 0, 0 };
 	SMALL_RECT rcRegion = { 0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1 };
 
-	CHAR_INFO maze[SCREEN_HEIGHT][SCREEN_WIDTH];
+	CHAR_INFO maze[SCREEN_HEIGHT][SCREEN_WIDTH] = { 0 };
 
 	ReadConsoleOutput(hOutput, (CHAR_INFO*)maze, dwBufferSize,
 		dwBufferCoord, &rcRegion);
@@ -41,15 +41,14 @@ int main() {
 	srand(time(NULL));
 
 	vector<Way> m_maze;
-	m_maze.emplace_back(1, 1);
-	maze[1][1].Attributes = 255;
+	m_maze.emplace_back(START_POINT_Y, START_POINT_X);
+	maze[START_POINT_Y][START_POINT_X].Attributes = 255;
 	bool check = false;
 	int i = 0, count = 0;
 	int ax = 1, bx = 1;
 	Point point[4];
+	system("pause");
 	while (1) {
-		ax = m_maze.back().A();
-		bx = m_maze.back().B();
 		if (ax == 1 && bx == 1) {
 			if (check) {
 				system("pause");
@@ -81,14 +80,16 @@ int main() {
 			m_maze.pop_back();
 		}
 		else {
-			Sleep(10);
-			int fuq = rand() % i;
-			m_maze.emplace_back(point[fuq].m_a, point[fuq].m_b);
-			maze[point[fuq].m_a][point[fuq].m_b].Attributes = 255;
-			maze[ax + (point[fuq].m_a - ax) / 2][bx + (point[fuq].m_b - bx) / 2].Attributes = 255;
+			//Sleep(10);
+			int turn = rand() % i;
+			m_maze.emplace_back(point[turn].m_a, point[turn].m_b);
+			maze[point[turn].m_a][point[turn].m_b].Attributes = 255;
+			maze[ax + (point[turn].m_a - ax) / 2][bx + (point[turn].m_b - bx) / 2].Attributes = 255;
 			count++; i = 0;
+			WriteConsoleOutput(hOutput, (CHAR_INFO*)maze, dwBufferSize,
+				dwBufferCoord, &rcRegion);
 		}
-		WriteConsoleOutput(hOutput, (CHAR_INFO*)maze, dwBufferSize,
-			dwBufferCoord, &rcRegion);
+		ax = m_maze.back().A();
+		bx = m_maze.back().B();
 	}
 }
