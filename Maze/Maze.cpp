@@ -1,7 +1,7 @@
 ﻿//#include <iostream>
 #include <windows.h>
-#include <vector>
 #include <ctime>
+#include <stack>
  
 #define SCREEN_HEIGHT 50
 #define SCREEN_WIDTH  211
@@ -40,8 +40,8 @@ int main() {
 
 	srand(time(NULL));
 
-	vector<Way> m_maze;
-	m_maze.emplace_back(START_POINT_Y, START_POINT_X);
+	stack<Way> m_maze;
+	m_maze.emplace(START_POINT_Y, START_POINT_X);
 	maze[START_POINT_Y][START_POINT_X].Attributes = 255;
 	bool check = false;
 	int i = 0, count = 0;
@@ -77,19 +77,19 @@ int main() {
 			++i;
 		}
 		if (!i) {
-			m_maze.pop_back();
+			m_maze.pop();
 		}
 		else {
 			//Sleep(10);
 			int turn = rand() % i;
-			m_maze.emplace_back(point[turn].m_a, point[turn].m_b);
+			m_maze.emplace(point[turn].m_a, point[turn].m_b);
 			maze[point[turn].m_a][point[turn].m_b].Attributes = 255;
 			maze[ax + (point[turn].m_a - ax) / 2][bx + (point[turn].m_b - bx) / 2].Attributes = 255;
 			count++; i = 0;
 			WriteConsoleOutput(hOutput, (CHAR_INFO*)maze, dwBufferSize,
 				dwBufferCoord, &rcRegion);
 		}
-		ax = m_maze.back().A();
-		bx = m_maze.back().B();
+		ax = m_maze.top().A();
+		bx = m_maze.top().B();
 	}
 }
