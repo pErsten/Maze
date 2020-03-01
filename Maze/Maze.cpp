@@ -15,7 +15,7 @@ public:
 	Way(const int& a, const int& b) : m_a(a), m_b(b) {}
 	/*friend std::ostream& operator<<(std::ostream& out, const Way& sh) {
 		out << sh.m_a << " " << sh.m_b << std::endl;
-		return out;//hi boi
+		return out;//hei bei
 	}*/
 	const int& A() { return m_a; }
 	const int& B() { return m_b; }
